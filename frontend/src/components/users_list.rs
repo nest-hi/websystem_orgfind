@@ -105,7 +105,6 @@ pub fn app() -> Html {
                     } ,
                     _ => {
                         message.set("Failed to update user".into());
-                        
                     }
                 }
                 

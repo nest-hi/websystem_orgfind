@@ -1,7 +1,7 @@
 use rocket::http::Status;
 use rocket::response::status::Custom;
 use tokio_postgres::{Client, Row};
-use std::collections::HashMap;
+// use std::collections::HashMap;
 
 pub async fn execute_query(
     client: &Client,
@@ -31,32 +31,32 @@ where
 }
 
 // For organization + tags
-pub fn group_organizations(rows: Vec<Row>) -> Vec<crate::models::organization::Organization> {
-    use crate::models::organization::Organization;
-    use crate::models::tag::Tag;
+// pub fn group_organizations(rows: Vec<Row>) -> Vec<crate::models::organization::Organization> {
+//     use crate::models::organization::Organization;
+//     use crate::models::tag::Tag;
 
-    let mut map: HashMap<i32, Organization> = HashMap::new();
+//     let mut map: HashMap<i32, Organization> = HashMap::new();
 
-    for row in rows {
-        let org_id: i32 = row.get(0);
-        let org_name: String = row.get(1);
+//     for row in rows {
+//         let org_id: i32 = row.get(0);
+//         let org_name: String = row.get(1);
 
-        let tag_id: Option<i32> = row.get(2);
-        let tag_name: Option<String> = row.get(3);
+//         let tag_id: Option<i32> = row.get(2);
+//         let tag_name: Option<String> = row.get(3);
 
-        let org = map.entry(org_id).or_insert_with(|| Organization {
-            id: Some(org_id),
-            name: org_name,
-            tags: Vec::new(),
-        });
+//         let org = map.entry(org_id).or_insert_with(|| Organization {
+//             id: Some(org_id),
+//             name: org_name,
+//             tags: Vec::new(),
+//         });
 
-        if let (Some(tid), Some(tname)) = (tag_id, tag_name) {
-            org.tags.push(Tag {
-                id: Some(tid),
-                name: tname,
-            });
-        }
-    }
+//         if let (Some(tid), Some(tname)) = (tag_id, tag_name) {
+//             org.tags.push(Tag {
+//                 id: Some(tid),
+//                 name: tname,
+//             });
+//         }
+//     }
 
-    map.into_values().collect()
-}
+//     map.into_values().collect()
+// }

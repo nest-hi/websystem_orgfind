@@ -11,5 +11,8 @@
             "username": "postgres",
             "password": "bash"
         }
-    ]
+    ],
+    "emmet.includeLanguages": {
+    "rust": "html",
+    }   
 }

@@ -7,7 +7,8 @@ SELECT * from tags;
 SELECT * from organization_tags;
 SELECT * from events;
 
-
+alter table organizations
+ADD background_image text;
 
 -- TODO Apr 24: a query for:
 -- 1.getting the tags of an organization(by id or name)
@@ -24,15 +25,36 @@ SELECT
 FROM organizations o
 LEFT JOIN organization_tags ot ON o.id = ot.organization_id
 LEFT JOIN tags t ON ot.tag_id = t.id
-WHERE t.name = 'Animals';
+;
 
 -- 2,
+
+
+CREATE TABLE events(
+    id SERIAL PRIMARY KEY,
+    title  TEXT NOT NULL UNIQUE,
+    description TEXT NOT NULL,
+    date_created timestamp not null default CURRENT_TIMESTAMP,
+    date_occuring DATE,
+    organization_id INTEGER NOT NULL,
+    FOREIGN KEY (organization_id) REFERENCES organizations(id)
+        ON DELETE CASCADE
+);
+
+INSERT into events(title , description, date_occuring, organization_id)
+VALUES
+('Gamejam', 'lorem basta ganon gamejam','10/25/2027' ,38),
+('Hackathon', 'lorem basta hakerist','12/17/2026' ,38);
 
 -- Tags table
 CREATE TABLE tags (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 );
+
+SELECT * from events;
+
+SELECT id, title, description, date_occuring, organization_id FROM events;
 
 INSERT INTO tags (name) VALUES
 ('Accounting'),
@@ -119,7 +141,7 @@ INSERT INTO tags (name) VALUES
 
 INSERT into tags (name) values ('Political Science');
 
-select * from tags;
+select * from events;
 
 -- Junction table for many-to-many relationship
 CREATE TABLE organization_tags (
@@ -128,8 +150,15 @@ CREATE TABLE organization_tags (
     PRIMARY KEY (organization_id, tag_id)
 );
 
+CREATE TABLE user_tags(
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE
+);
 
-
+CREATE TABLE event_tags(
+    event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+);
 
 
 -- INSERT INTO organizations (name) VALUES
@@ -392,7 +421,7 @@ WITH org_data(name, tags) AS (
     ('Mitochondrion Society', '["Biology", "Science"]'::jsonb), 
     ('PAMANA', '["Social Science"]'::jsonb),  
     ('PAFT', '["Food Technology"]'::jsonb),  
-    ('Philippine Association of Students in Office Administration', '["Office Administration"]'::jsonb), 
+    ('Philippine Association of Students in Office Administration', '["Leadership","Service","Advocacy"]'::jsonb), 
     ('Philippine Institute of Civil Engineers', '["Civil Engineering"]'::jsonb),  
     ('Philippine Institute of Industrial Engineers', '["Industrial Engineering"]'::jsonb), 
     ('Philippine Society of Medical Technology Students', '["Medical Technology"]'::jsonb), 
@@ -407,7 +436,7 @@ WITH org_data(name, tags) AS (
     ('Student Congress of Physical Education', '["Sports", "Education"]'::jsonb), 
     ('Tourism Students Association', '["Tourism"]'::jsonb), 
     ('The United Architects of the Philippines Student Auxiliary', '["Architecture"]'::jsonb), 
-    ('UTOPIA', '["Political Science"]'::jsonb), 
+    ('UTOPIA', '["Politics"]'::jsonb), 
     ('VKV-VLV', '["Veterinary"]'::jsonb)
 ),
 expanded AS (
@@ -423,6 +452,11 @@ SELECT
     t.id
 FROM expanded e
 JOIN organizations o ON o.name = e.name
-JOIN tags t ON t.name = e.tag_name ;
+JOIN tags t ON t.name = e.tag_name ON CONFLICT (organization_id, tag_id) DO NOTHING;
 
-SELECT * from organization_tags;
+SELECT * from tags;
+
+SELECT t.*
+FROM tags t
+LEFT JOIN organization_tags ot ON ot.tag_id = t.id
+WHERE ot.tag_id IS NULL;

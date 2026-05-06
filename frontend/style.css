@@ -1,3 +1,29 @@
 body{
-    background-color: rgb(86, 86, 178);
+    padding: 20px;
+    background-color: rgb(182, 182, 245);
+}
+
+.search_box {
+    display: flex;
+}
+
+.search_box .search_bar{
+    width: auto;
+    margin-left: auto;
+}
+
+.search_results{
+    display: flex;
+    
+    padding: 10px;
+    flex-direction: column;
+    gap: 5px;
+    background-color: bisque;
+}
+
+.item{
+    padding: 5px 10px;
+    font-weight: 500;
+    background-color: aliceblue;
+    border-radius: 10px;
 }

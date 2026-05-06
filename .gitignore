@@ -1,2 +1,6 @@
 frontend/target/
 backend/target/
+
+frontend/dist
+
+frontend/webroot

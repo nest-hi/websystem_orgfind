@@ -19,10 +19,13 @@ pub async fn get_events( connection: &State<Client> ) -> Result<Json<Vec<Event>>
     get_events_from_database(connection).await.map(Json)
 }
 
-pub async fn get_events_from_database( client: &Client ) -> Result<Vec<Event>, Custom<String>> { //
-    fetch_all(client, "SELECT id, name FROM events", |row| Event {
+pub async fn get_events_from_database( client: &Client ) -> Result<Vec<Event>, Custom<String>> { 
+    fetch_all(client, "SELECT id, title, description, date_occuring, organization_id FROM events;", |row| Event {
         id: Some(row.get(0)),
         name: row.get(1),
+        description: row.get(2),
+        date_occuring: row.get(3),
+        host_id: row.get(4)
     }).await
 }
 

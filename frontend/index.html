@@ -5,16 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meep</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
     <link data-trunk rel="css" href="style.css"/>
 </head>
-<body>
-    <h1>Hello</h1>
-    <div id="app"></div>
-    <script type="module">
-        import init from './pkg/frontend.js';
-        init();
-    </script>
+    <body>
 
-</body>
+        <div id="search_bar"></div>
+        <script data-trunk src="src/main.rs"></script>
+
+    </body>
 </html>
