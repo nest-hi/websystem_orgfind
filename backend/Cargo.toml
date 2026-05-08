@@ -12,3 +12,5 @@ tokio-postgres = {version = "0.7", features = ["with-chrono-0_4"] }
 rocket_cors = { version = "0.6.0", default-features = false }
 chrono = { version = "0.4", features = ["serde"] }
 yew = { version = "0.23.0", features = ["ssr"] }
+reqwest = { version = "0.13.3", features = ["json"] }
+web-sys = "0.3.98"

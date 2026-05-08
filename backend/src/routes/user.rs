@@ -16,7 +16,6 @@ pub async fn add_user( connection: &State<Client>,user: Json<User> ) //
 }
 
 
-
 #[delete("/<id>")]
 pub async fn delete_user( connection: &State<Client>, id: i32 ) //
     -> Result<Status, Custom<String>>{

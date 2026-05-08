@@ -25,11 +25,12 @@ SELECT
 FROM organizations o
 LEFT JOIN organization_tags ot ON o.id = ot.organization_id
 LEFT JOIN tags t ON ot.tag_id = t.id
-;
+WHERE t.name = 'Arts & Sciences';
+
+update table tags 
+
 
 -- 2,
-
-
 CREATE TABLE events(
     id SERIAL PRIMARY KEY,
     title  TEXT NOT NULL UNIQUE,
@@ -460,3 +461,5 @@ SELECT t.*
 FROM tags t
 LEFT JOIN organization_tags ot ON ot.tag_id = t.id
 WHERE ot.tag_id IS NULL;
+
+INSERT INTO tags (name) VALUES ('Architecture');
