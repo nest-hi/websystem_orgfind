@@ -14,6 +14,32 @@ pub async fn add_event( connection: &State<Client>,event: Json<Event> ) //
     get_events(connection).await
 }
 
+#[get("/<id>")]
+pub async fn get_event(connection: &State<Client>, id: i32)
+    -> Result<Json<Event>, Custom<String>> {
+
+    let rows = connection
+        .query(
+            "SELECT id, title, description, date_occuring, organization_id
+            FROM events
+            WHERE id = $1",
+            &[&id])
+        .await
+        .map_err(|e| Custom(Status::InternalServerError, e.to_string()))?;
+    
+    if rows.is_empty() {
+        return Err(Custom(Status::NotFound, "Organization not found".to_string()));
+    }
+
+    let event = Event{
+        id:Some(rows[0].get(0)),
+        name:rows[0].get(1), 
+        description: rows[0].get(2), 
+        date_occuring: rows[0].get(3), 
+        host_id: rows[0].get(4)};
+    Ok(Json(event))
+}
+
 #[get("/")]
 pub async fn get_events( connection: &State<Client> ) -> Result<Json<Vec<Event>>, Custom<String>> { //
     get_events_from_database(connection).await.map(Json)
@@ -47,5 +73,5 @@ pub async fn update_event( connection: &State<Client>, id: i32, event:Json<Event
 }
 
 pub fn routes() -> Vec<rocket::Route>{
-    routes![add_event, get_events, update_event, delete_event]
+    routes![add_event, get_event, get_events, update_event, delete_event]
 }
