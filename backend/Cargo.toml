@@ -7,10 +7,12 @@ edition = "2024"
 rocket = {version = "0.5.1", features = ["json"]}
 serde ={ version = "1.0", features = ["derive"]}
 serde_json = "1.0"
-tokio = {version = "1.52.2", features = ["full"]}
+rocket_dyn_templates = { version = "0.2", features = ["tera"] }
+tokio = {version = "1.52.3", features = ["full"]}
 tokio-postgres = {version = "0.7", features = ["with-chrono-0_4"] }
 rocket_cors = { version = "0.6.0", default-features = false }
 chrono = { version = "0.4", features = ["serde"] }
 yew = { version = "0.23.0", features = ["ssr"] }
 reqwest = { version = "0.13.3", features = ["json"] }
 web-sys = "0.3.98"
+deadpool-postgres = "0.14.1"

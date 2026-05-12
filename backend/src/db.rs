@@ -1,5 +1,9 @@
-use rocket::http::Status;
+use std::collections::HashMap;
+
+use rocket::serde::json::Json;
+use rocket::{State, http::Status};
 use rocket::response::status::Custom;
+use serde::Serialize;
 use tokio_postgres::{Client, Row};
 // use std::collections::HashMap;
 
@@ -30,33 +34,98 @@ where
     Ok(rows.iter().map(mapper).collect())
 }
 
-// For organization + tags
-// pub fn group_organizations(rows: Vec<Row>) -> Vec<crate::models::organization::Organization> {
-//     use crate::models::organization::Organization;
-//     use crate::models::tag::Tag;
 
-//     let mut map: HashMap<i32, Organization> = HashMap::new();
+#[derive(Serialize)]
+pub struct SearchResult {
+    pub result_type: String,
+    pub title: String,
+    pub tags: Vec<String>,
+    pub is_academic: Option<bool>,
+}
 
-//     for row in rows {
-//         let org_id: i32 = row.get(0);
-//         let org_name: String = row.get(1);
+// pub async fn search_query(
+//     client: &State<Client>,
+//     query: &str,
+//     params: &[&(dyn tokio_postgres::types::ToSql + Sync)])
+//      -> Result<Json<Vec<SearchResult>>, Custom<String>> {
+//     let rows = client.query(
+//         "
+//         ", &[])
+//         .await
+//         .map_err(|e| Custom(Status::InternalServerError, e.to_string()))?;
+//     if rows.is_empty(){
+//         return Err(Custom(Status::NotFound, "No Results Found".to_string()));
+//     } else {
 
-//         let tag_id: Option<i32> = row.get(2);
-//         let tag_name: Option<String> = row.get(3);
+//         let mut map: HashMap<i32, SearchResult> = HashMap::new();
 
-//         let org = map.entry(org_id).or_insert_with(|| Organization {
-//             id: Some(org_id),
-//             name: org_name,
-//             tags: Vec::new(),
-//         });
+//         for row in rows {
 
-//         if let (Some(tid), Some(tname)) = (tag_id, tag_name) {
-//             org.tags.push(Tag {
-//                 id: Some(tid),
-//                 name: tname,
-//             });
 //         }
+
+
+
+
+
+
+//         return Ok(Json(rows));
 //     }
 
-//     map.into_values().collect()
+
+    
+        
+    // fetch_all(client, query, |row| SearchResult{
+    //     result_type: row.get(0),
+    //     title: row.get(1),
+    //     tags: row.get(2),
+    //     is_academic: row.get(3)
+    // } ).await
 // }
+
+pub async fn search_by_tags(
+    client: &Client,
+    tags: &[&str],
+) -> Result<Json<Vec<SearchResult>>, Custom<String>> {
+    if tags.is_empty() {
+        return Err(Custom(Status::BadRequest, "No tags provided".to_string()));
+    }
+
+    // Convert tags to a format suitable for SQL
+    let tags_param: Vec<&str> = tags.iter().copied().collect();
+    
+    let query = "
+        SELECT 'user' as result_type, u.username as title, u.tags, NULL as is_academic
+        FROM users u
+        WHERE u.tags && $1::text[]
+        UNION ALL
+        SELECT 'organization' as result_type, o.name as title, o.tags, NULL as is_academic
+        FROM organizations o
+        WHERE o.tags && $1::text[]
+        UNION ALL
+        SELECT 'event' as result_type, e.title, e.tags, e.is_academic
+        FROM events e
+        WHERE e.tags && $1::text[]
+        ORDER BY result_type, title
+    ";
+
+    let rows = client
+        .query(query, &[&tags_param])
+        .await
+        .map_err(|e| Custom(Status::InternalServerError, e.to_string()))?;
+
+    if rows.is_empty() {
+        return Err(Custom(Status::NotFound, "No results found".to_string()));
+    }
+
+    let results: Vec<SearchResult> = rows
+        .iter()
+        .map(|row| SearchResult {
+            result_type: row.get(0),
+            title: row.get(1),
+            tags: row.get(2),
+            is_academic: row.get(3),
+        })
+        .collect();
+
+    Ok(Json(results))
+}

@@ -5,16 +5,18 @@ SELECT * from organizations;
 SELECT * from users;
 SELECT * from tags;
 SELECT * from organization_tags;
+SELECT * from event_tags;
 SELECT * from events;
 
-alter table organizations
-ADD background_image text;
+
+SELECT o.id, o.name, o.p_image, o.b_image, t.id, t.name 
+            FROM organizations o 
+            LEFT JOIN organization_tags ot ON o.id = ot.organization_id
+            LEFT JOIN tags t ON ot.tag_id = t.id;
 
 -- TODO Apr 24: a query for:
 -- 1.getting the tags of an organization(by id or name)
 -- 2.returning organizations based on tags
-
-
 
 -- Joins for organization with it's tags
 SELECT 
@@ -26,8 +28,6 @@ FROM organizations o
 LEFT JOIN organization_tags ot ON o.id = ot.organization_id
 LEFT JOIN tags t ON ot.tag_id = t.id
 WHERE t.name = 'Arts & Sciences';
-
-update table tags 
 
 
 -- 2,
@@ -57,93 +57,6 @@ SELECT * from events;
 
 SELECT id, title, description, date_occuring, organization_id FROM events;
 
-INSERT INTO tags (name) VALUES
-('Accounting'),
-('Advocacy'),
-('Agriculture'),
-('Agricultural Engineering'),
-('Anime'),
-('Animals'),
-('Arts'),
-('Arts & Sciences'),
-('Biology'),
-('Broadcast'),
-('Business'),
-('Civil Engineering'),
-('Cloud'),
-('Communication'),
-('Community'),
-('Computer'),
-('Creativity'),
-('Criminology'),
-('Debate'),
-('Economics'),
-('Education'),
-('Electronics'),
-('Emergency'),
-('Engineering'),
-('English'),
-('Esports'),
-('Finance'),
-('Food Technology'),
-('Gaming'),
-('Governance'),
-('Health'),
-('HR'),
-('Hospitality'),
-('Industrial Engineering'),
-('International'),
-('International Relations'),
-('IT'),
-('Journalism'),
-('Labor'),
-('Language'),
-('Law'),
-('Leadership'),
-('LGBTQ+'),
-('Literature'),
-('Management'),
-('Marketing'),
-('Mathematics'),
-('Media'),
-('Medical'),
-('Medical Technology'),
-('Mental Health'),
-('Multimedia'),
-('Music'),
-('Nursing'),
-('Operations'),
-('Outdoor'),
-('Performance'),
-('Physical Activity'),
-('Politics'),
-('Pop Culture'),
-('Programming'),
-('Psychology'),
-('Publication'),
-('Religious'),
-('Safety'),
-('Scholars'),
-('Science'),
-('Security'),
-('Service'),
-('Social Science'),
-('Social Work'),
-('Sports'),
-('STEM'),
-('Sustainability'),
-('Technology'),
-('Tourism'),
-('Volunteer'),
-('Writing'),
-('Youth'),
-('Veterinary');
-
-
-INSERT into tags (name) values ('Political Science');
-
-select * from events;
-
 -- Junction table for many-to-many relationship
 CREATE TABLE organization_tags (
     organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -156,93 +69,16 @@ CREATE TABLE user_tags(
     tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE
 );
 
+SELECT * FROM user_tags;
+
 CREATE TABLE event_tags(
     event_id INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-    tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+    tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE
 );
 
+SELECT * FROM event_tags;
 
--- INSERT INTO organizations (name) VALUES
---    ('Argumentatum El Debaztere Society'),
---    ("CCJ Information, Communications, and Technical Team"),
---    ("CCJ Emergency Response and Airsoft Team"),
---    ("CSPEAR Sports Organization"), 
---    ("CvSU DOST Scholars Association"),
---    ("The Hornets Cheer Squad"), 
---    ("CvSU Mountaineering Society"), 
---    ("CvSU Musikeros"),
---    ("CvSU Otaku Society"), 
---    ("CvSU Red Cross Youth"), 
---    ("CvSU Silayan"), 
---    ("AWS Learning Club - Spade"), 
---    ("Lipon ng Kagalingan ang Hanay ng mga Artistikong Indibidwal"),
---    ("The Asclepian Society"), 
---    ("The Gazette"), 
---    ("The Pinnacle Esports Organization"),
---    ("Youth for Animals"),
---    ("Foreign Student Association"), 
---    ("Gerero's Spear"),
---    ("CVSU Kasama  Kabsuhenyong Samahan ng Manggagawa Manlilikha at Manininda"),
---    ("Mind Your Mind"), 
---    ("Talesmiths' Collective"),
---    ("Sinagtala Multimedia Arts Organization"), 
---    ("Society for the Advancement of Veterinary Education and Research"), 
---    ("YTR Youth Organization Inc."), 
---    ("DZSU Hayag Luntian"), 
---    ("Kristyanong Kabataan para sa Bayan"),
-
--- --    
-
---    ("College of Arts and Sciences Student Council"), 
---    ("College of Criminal Justice Student Council"), 
---    ("CEMDS Student Council"), 
---    ("College of Education Student Council"), 
---    ("CEIT Student Council"), 
---    ("CAFENR Student Council"), 
---    ("College of Nursing Student Council"), 
---    ("CSPEAR Student Council"),
---    ("CTHM Student Council"), 
---    ("CVMBS Student Council"), 
-
--- -- 
-
---    ("Computer Science Student Organization"),
---    ("Computer Engineering Students' Society"),
---    ("Elite League of Information Technology"),
---    ("Criminology Society"), 
---    ("Industrial Security Student Society"),
---    ("Education Circle"), 
---    ("International Studies Students' Association"), 
---    ("Journalism Guild"), 
---    ("Junior Financial Executives"), 
---    ("Junior Marketing Association"), 
---    ("Junior Operations Management Association"), 
---    ("Junior People Management Association of the Philippines"), 
---    ("Junior Philippine Institution of Accountants"),
---    ("Junior Social Workers of the Philippines"), 
---    ("Leading Association of Nightingales in Training & Emerging Registered Nurses"), 
---    ("Matayuyon Crop Science Society"), 
---    ("Mitochondrion Society"), 
---    ("PAMANA"),  
---    ("PAFT"),  
---    ("Philippine Association of Students in Office Administration"), 
---    ("Philippine Institute of Civil Engineers"),  
---    ("Philippine Institute of Industrial Engineers"), 
---    ("Philippine Society of Medical Technology Students"), 
---    ("Philippine Society of Agricultural and Biosystems Engineers"), 
---    ("Pragmaticus"), 
---    ("Psychology Circle"), 
---    ("Radicand"), 
---    ("Rodeo Club"), 
---    ("Salinlahi"), 
---    ("Society of Future Economists"), 
---    ("Society of Industrial Technology Electronics Students"), 
---    ("Student Congress of Physical Education"), 
---    ("Tourism Students Association"), 
---    ("The United Architects of the Philippines Student Auxiliary"), 
---    ("UTOPIA"), 
---    ("VKV-VLV");
-
+INSERT 
 
 
 -- Organizations table
@@ -463,3 +299,12 @@ LEFT JOIN organization_tags ot ON ot.tag_id = t.id
 WHERE ot.tag_id IS NULL;
 
 INSERT INTO tags (name) VALUES ('Architecture');
+
+
+select title from events
+UNION ALL
+select name from organizations
+UNION ALL
+select name from users
+WHERE name ILIKE '%' || 'UTOPIA' || '%';
+

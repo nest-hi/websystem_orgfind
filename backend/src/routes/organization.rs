@@ -33,7 +33,7 @@ pub async fn get_organization(connection: &State<Client>, id: i32)
     let rows = connection
         .query(
             "
-            SELECT o.id, o.name, t.id, t.name 
+            SELECT o.id, o.name, o.p_image, o.b_image, t.id, t.name 
             FROM organizations o 
             LEFT JOIN organization_tags ot ON o.id = ot.organization_id
             LEFT JOIN tags t ON ot.tag_id = t.id
@@ -51,12 +51,14 @@ pub async fn get_organization(connection: &State<Client>, id: i32)
     let mut organization = Organization {
         id: Some(rows[0].get(0)),
         name: rows[0].get(1),
+        pfp: rows[0].get(2),
+        bgp: rows[0].get(3),
         tags: vec![],
     };
 
     for row in rows {
-        let tag_id: Option<i32> = row.get(2);
-        let tag_name: Option<String> = row.get(3);
+        let tag_id: Option<i32> = row.get(4);
+        let tag_name: Option<String> = row.get(5);
 
         if let (id, Some(name)) = (tag_id, tag_name) {
             organization.tags.push(Tag {
@@ -87,7 +89,7 @@ pub async fn get_organization_from_database( client: &Client )
     let rows = client
         .query(
             "
-            SELECT o.id, o.name, t.id, t.name 
+            SELECT o.id, o.name, o.p_image, o.b_image, t.id, t.name  
             FROM organizations o 
             LEFT JOIN organization_tags ot ON o.id = ot.organization_id
             LEFT JOIN tags t ON ot.tag_id = t.id;
@@ -102,13 +104,17 @@ pub async fn get_organization_from_database( client: &Client )
     for row in rows {
         let org_id: i32 = row.get(0);
         let org_name: String = row.get(1);
+        let p_image: String = row.get(2);
+        let b_image: String = row.get(3);
 
-        let tag_id: Option<i32> = row.get(2);
-        let tag_name: Option<String> = row.get(3);
+        let tag_id: Option<i32> = row.get(4);
+        let tag_name: Option<String> = row.get(5);
 
         let org = map.entry(org_id).or_insert(Organization {
             id: Some(org_id),
             name: org_name,
+            pfp: Some(p_image),
+            bgp: Some(b_image),
             tags: vec![],
         });
 

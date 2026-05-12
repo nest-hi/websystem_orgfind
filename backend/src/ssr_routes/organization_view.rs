@@ -1,53 +1,93 @@
 use rocket::response::content::RawHtml;
 use yew::{Html, Properties, ServerRenderer, component, html};
 
-use crate::{ViewableData, models::organization::Organization};
+use crate::models::{organization::Organization, tag::Tag};
 
 
 
 #[derive(Properties, PartialEq, Default)]
 pub struct OrganizationProps {
-    pub organization_id: i32,
+    pub organization: Organization
 }
 
 
 #[component(OrganizationView)]
 pub fn organization_view(props: &OrganizationProps) -> Html {
+    let org = &props.organization;
+
     html! {
         <>
-            <div>
-                { format!("replace-Organization ID: {}", props.organization_id) }
+            <div class="organization-page">
+                <div class="background-container">
+                    <img
+                        class="background-image"
+                        src={
+                            org.bgp
+                                .clone()
+                                .unwrap_or("/images/default-bg.png".into())
+                        }
+                    />
+                </div>
+                <div class="hero">
+                    <img
+                        class="profile-image"
+                        src={
+                            org.pfp
+                                .clone()
+                                .unwrap_or("/images/default-pfp.png".into())
+                        }
+                    />
+                    
+                    <div class="info">
+                        <h1 class="name">{ &org.name }</h1>
+                        <div id="imaginary_points">
+                            <h6 class="followers">{""}</h6>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+
+                <p>
+                    // { format!("Organization ID: {:?}", org.id) }
+                </p>
+
             </div>
         </>
     }
 }
 
+
+
+
+
 #[get("/organization/<id>")]
 pub async fn organization_rendered_view(id:i32) -> RawHtml<String> {
     
-    let html = ServerRenderer::<OrganizationView>::with_props(move || OrganizationProps {
-        organization_id: id,
-    })
-    .render()
-    .await;
+   
+    let organization =
+        reqwest::get(
+            format!(
+                "http://127.0.0.1:8000/api/organizations/{}",
+                id
+            )
+        )
+        .await
+        .unwrap()
+        .json::<Organization>()
+        .await
+        .unwrap();
 
-    let mut title = ViewableData {
-        id: None,
-        name: None,
-    };
+    let title = organization.name.clone();
 
-    if let Ok(resp) = reqwest::get(
-        format!("http://127.0.0.1:8000/api/organizations/{}", id)
-    ).await {
-        if resp.status().is_success() {
-            if let Ok(data) = resp.json::<Organization>().await {
-                title = ViewableData {
-                    id: data.id,
-                    name: Some(data.name),
-                };
+    let html =
+        ServerRenderer::<OrganizationView>::with_props(
+            move || OrganizationProps {
+                organization,
             }
-        }
-    }
+        )
+        .render()
+        .await;
 
     RawHtml(format!(r#"
         <!DOCTYPE html>
@@ -59,7 +99,7 @@ pub async fn organization_rendered_view(id:i32) -> RawHtml<String> {
             </script>
             <script src="/scripts/script.js"></script>
             <link rel="stylesheet" href="/stylesheets/style.css">
-            <link rel="stylesheet" href="/stylesheets/org-event.css">
+            <link rel="stylesheet" href="/stylesheets/organization-view.css">
             <title>{}</title>
         </head>
 
@@ -86,15 +126,12 @@ pub async fn organization_rendered_view(id:i32) -> RawHtml<String> {
                 </div>
             </header>
             
-            <div id="root">{}</div>
+            <body id="root">{}</body>
         </body>
         </html>
-    "#,
-    title
-        .name
-        .clone()
-        .unwrap_or("Default Title".to_string()),
-    html
+        "#,
+        title,
+        html
     ))
 }
 

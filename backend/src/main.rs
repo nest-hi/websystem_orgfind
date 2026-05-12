@@ -9,7 +9,8 @@ use std::path::{Path, PathBuf};
 
 
 
-use rocket::{ fairing::AdHoc, fs::{FileServer, NamedFile}};
+
+use rocket::{  fairing::AdHoc, fs::{FileServer, NamedFile}};
 use rocket_cors::{AllowedOrigins, CorsOptions};
 use tokio_postgres::NoTls;
 use routes::*;
@@ -49,14 +50,16 @@ async fn rocket() -> _ {
         .mount("/api/tags", tag::routes())
         .mount("/api/organizations", organization::routes())
 
-        .mount("/user", user_view::routes())
-        .mount("/organization", organization_view::routes())
-        .mount("/events",event_view::routes() )
+        .mount("/", user_view::routes())
+        .mount("/", organization_view::routes())
+        .mount("/",event_view::routes() )
 
         // .mount("/", routes![user_rendered_view,organization_rendered_view,event_rendered_view])
         
         .mount("/", FileServer::from("../frontend/webroot").rank(5))
         .mount("/", FileServer::from("../frontend/dist").rank(10))
+        .mount("/image/", FileServer::from("image").rank(1))
+
         .mount("/", routes![spa_fallback])
 
         .attach(cors)
